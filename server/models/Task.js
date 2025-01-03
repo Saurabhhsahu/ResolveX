@@ -31,6 +31,10 @@ const TaskSchema = new mongoose.Schema(
       ref: "User", 
       required: true,
     },
+    location: {
+      type: [Number],
+      index: "2dsphere",
+    },
   },
 );
 

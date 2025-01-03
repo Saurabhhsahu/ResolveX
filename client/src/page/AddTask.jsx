@@ -1,20 +1,31 @@
 import React, { useState } from 'react'
 import {useUser} from '../context/UserContext'
+import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
 
 function AddTask() {
   // State to manage form inputs
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [bounty, setBounty] = useState('')
+  const [location, setLocation] = useState(null);
 
   const {addTask} = useUser();
 
-  // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault()
-    // Here you can send the form data to an API or update state
-    addTask(title,description,bounty);
+    addTask(title,description,bounty,location);
   }
+
+  const MapClickHandler = () => {
+    useMapEvents({
+      click: (e) => {
+        setLocation([e.latlng.lat, e.latlng.lng]);
+      },
+    });
+    return location ? <Marker position={location} /> : null;
+  };
+
 
   return (
     < div className="w-full bg-black py-20" >
@@ -67,6 +78,18 @@ function AddTask() {
               placeholder="Enter bounty amount"
               required
             />
+          </div>
+
+          <p>Add Location : </p>
+          <div style={{ height: "400px", width: "100%", margin: "20px 0" }}>
+            <MapContainer center={[51.505, -0.09]} zoom={13} style={{ height: "100%", width: "100%" }}>
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution="&copy; OpenStreetMap contributors"
+              />
+              <MapClickHandler />
+            </MapContainer>
+            {location && <p>Selected Location: {location[0]}, {location[1]}</p>}
           </div>
 
           {/* Submit Button */}

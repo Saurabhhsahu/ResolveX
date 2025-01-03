@@ -89,8 +89,6 @@ const UserSignin = async (req, res) => {
                 message: 'Password should have at least 8 characters',
             });
         }
-
-        
         
         // Check if user exists
         const existingUser = await User.findOne({ email });
@@ -165,10 +163,10 @@ const UpdateProfile = async (req, res) => {
 
 const AddTask = async(req,res) => {
     try{
-        const {title,description,bounty,userId} = req.body;
-        console.log(`title : ${title} description: ${description} bounty : ${bounty} id : ${userId}`);
+        const {title,description,bounty,userId,location} = req.body;
+        console.log(`title : ${title} description: ${description} bounty : ${bounty} id : ${userId} location : ${location}`);
         
-        if (!userId || !title || !description || !bounty) {
+        if (!userId || !title || !description || !bounty || !location) {
             return res.status(400).json({ success: false, message: 'Missing Data' });
         }
 
@@ -179,7 +177,8 @@ const AddTask = async(req,res) => {
             title,
             description,
             bounty,
-            user:existingUser
+            user:existingUser,
+            location
         });
         await newTask.save();
 
@@ -197,4 +196,25 @@ const AddTask = async(req,res) => {
     }
 }
 
-export { UserSignup, UserSignin, UpdateProfile,AddTask };
+const AllTask = async(req,res) => {
+    try{
+        const {userId} = req.body;
+
+        const allTask = await Task.find({user:userId,status:"Pending"});
+        
+        res.status(201).json({
+            success: true,
+            allTask,
+            message: 'All task returned successfully',
+        });
+    }
+    catch (err) {
+        console.error('Error in  getting all task: ', err);
+        res.status(500).json({
+            success: false,
+            message: 'Error in getting all task',
+        });
+    }
+}
+
+export { UserSignup, UserSignin, UpdateProfile,AddTask,AllTask };

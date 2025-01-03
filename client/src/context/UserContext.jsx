@@ -1,12 +1,15 @@
 import { createContext, useState, useContext } from "react";
-import { Navigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const userContext = createContext();
 
 export const UserProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem("token") || ""); 
+  const [tasks,setTasks] = useState(null);
   const URI = import.meta.env.VITE_API_URI; 
+
+  const navigate = useNavigate();
 
   const signup = async (name, email, password) => {
     if (!name || !email || !password) {
@@ -51,16 +54,16 @@ export const UserProvider = ({ children }) => {
     }
   };
 
-  const addTask = async(title,description,bounty) => {
+  const addTask = async(title,description,bounty,location) => {
     try{
-      console.log(`title : ${title} description: ${description} bounty : ${bounty}`);
-      const response = await axios.post(`${URI}/user/addTask`,{title,description,bounty},{headers:{token}});
+      console.log(`title : ${title} description: ${description} bounty : ${bounty} location: ${location}`);
+      const response = await axios.post(`${URI}/user/addTask`,{title,description,bounty,location},{headers:{token}});
       const data = response.data;
       console.log(data);
       
-
       if(data.success){
-        Navigate('/tasks');
+        getAllTask()
+        navigate('/allTask');
       }else{
         console.log(data.message);
       }
@@ -70,12 +73,32 @@ export const UserProvider = ({ children }) => {
     }
   }
 
+  const getAllTask = async() => {
+    try{
+      const response = await axios.get(`${URI}/user/allTask`,{headers:{token}});
+      const data = response.data;
+
+      if(data.success){
+        console.log(data.allTask);
+        
+        setTasks(data.allTask);
+      }
+      else{
+        console.log(data.message);
+      }
+    }
+    catch (err) {
+      console.error("Error in getting all task:", err);
+    }
+  }
+
   const value = {
     token,
     setToken,
     signup,
     signin,
-    addTask
+    addTask,getAllTask,
+    tasks,setTasks
   };
 
   return <userContext.Provider value={value}>{children}</userContext.Provider>;
