@@ -14,7 +14,7 @@ function Tasks() {
   
   useEffect(() => {
     getAllTask();
-  }, []); // Add dependency array to avoid infinite re-renders
+  },[]); // Add dependency array to avoid infinite re-renders
 
   // Define a custom icon for the marker
   const customIcon = new L.Icon({

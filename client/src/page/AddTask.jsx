@@ -1,14 +1,14 @@
 import React, { useState } from 'react'
 import {useUser} from '../context/UserContext'
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
+import useMapClick from '../hook/useMapClick'
 
 function AddTask() {
   // State to manage form inputs
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [bounty, setBounty] = useState('')
-  const [location, setLocation] = useState(null);
+
+  const { location, MapComponent } = useMapClick();
 
   const {addTask} = useUser();
 
@@ -16,16 +16,6 @@ function AddTask() {
     e.preventDefault()
     addTask(title,description,bounty,location);
   }
-
-  const MapClickHandler = () => {
-    useMapEvents({
-      click: (e) => {
-        setLocation([e.latlng.lat, e.latlng.lng]);
-      },
-    });
-    return location ? <Marker position={location} /> : null;
-  };
-
 
   return (
     < div className="w-full bg-black py-20" >
@@ -80,17 +70,15 @@ function AddTask() {
             />
           </div>
 
-          <p>Add Location : </p>
-          <div style={{ height: "400px", width: "100%", margin: "20px 0" }}>
-            <MapContainer center={[51.505, -0.09]} zoom={13} style={{ height: "100%", width: "100%" }}>
-              <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution="&copy; OpenStreetMap contributors"
-              />
-              <MapClickHandler />
-            </MapContainer>
-            {location && <p>Selected Location: {location[0]}, {location[1]}</p>}
-          </div>
+          <p className="mb-2">Add Location:</p>
+            <div style={{ height: "400px", width: "100%", marginBottom: "20px" }}>
+              <MapComponent />
+            </div>
+            {location && (
+              <p>
+                Selected Location: {location[0]}, {location[1]}
+              </p>
+            )}
 
           {/* Submit Button */}
           <button

@@ -8,6 +8,8 @@ const Navbar = () => {
   const { user = {} } = useUser();
   const navigate = useNavigate(); // Initialize useNavigate
 
+  const {setToken} = useUser();
+
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
 
   // Function to handle navigation
@@ -15,6 +17,11 @@ const Navbar = () => {
     navigate(path);
     setDropdownOpen(false); // Close dropdown after navigation
   };
+
+  const handleLogout = () => {
+    setToken('');
+    localStorage.removeItem('token')
+  }
 
   return (
     <nav className="bg-blue-700 text-white px-4 py-2 flex items-center justify-between shadow-lg">
@@ -43,7 +50,7 @@ const Navbar = () => {
               <li className="px-4 py-2 hover:bg-gray-200 cursor-pointer" onClick={() => handleNavigation('/setting')}>
                 Settings
               </li>
-              <li className="px-4 py-2 hover:bg-gray-200 cursor-pointer" onClick={() => handleNavigation('/logout')}>
+              <li className="px-4 py-2 hover:bg-gray-200 cursor-pointer" onClick={handleLogout}>
                 Logout
               </li>
             </ul>

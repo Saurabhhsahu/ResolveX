@@ -32,8 +32,16 @@ const TaskSchema = new mongoose.Schema(
       required: true,
     },
     location: {
-      type: [Number],
-      index: "2dsphere",
+      type: {
+        type: String,
+        enum: ['Point'], // This ensures that only a 'Point' type is used.
+        required: true
+      },
+      coordinates: {
+        type: [Number], // Array of [longitude, latitude]
+        required: true
+      },
+      
     },
   },
 );

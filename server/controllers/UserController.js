@@ -6,27 +6,28 @@ import Task from '../models/Task.js'
 
 const UserSignup = async (req, res) => {
     try {
-        console.log("Handling user signup...");
 
-        const { name, email, password } = req.body;
-
+        const { name, email, password,location } = req.body;
+        
+        
         // Validate input
-        if (!email || !password || !name) {
+        if (!email || !password || !name || !location) {
             return res.status(400).json({ success: false, message: 'Missing data' });
         }
+        
 
         if (!validator.isEmail(email)) {
             console.log("hello");
             return res.status(400).json({ success: false, message: 'Invalid email format' });
         }
-
+        
         if (password.length < 8) {
             return res.status(400).json({
                 success: false,
                 message: 'Password should have at least 8 characters',
             });
         }
-
+        
         // Check if user already exists
         const existingUser = await User.findOne({ email });
         
@@ -37,6 +38,7 @@ const UserSignup = async (req, res) => {
             });
         }
 
+    
         // Hash password
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
@@ -46,6 +48,7 @@ const UserSignup = async (req, res) => {
             email,
             password: hashedPassword,
             name,
+            location
         });
         await newUser.save();
 
@@ -182,6 +185,8 @@ const AddTask = async(req,res) => {
         });
         await newTask.save();
 
+        // req.app.get("io").emit("taskUploaded", { title, description, existingUser });
+
         res.status(201).json({
             success: true,
             message: 'Task added successfully',
@@ -200,7 +205,7 @@ const AllTask = async(req,res) => {
     try{
         const {userId} = req.body;
 
-        const allTask = await Task.find({user:userId,status:"Pending"});
+        const allTask = await Task.find({status:"Pending"});
         
         res.status(201).json({
             success: true,

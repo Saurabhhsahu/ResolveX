@@ -1,4 +1,4 @@
-import { createContext, useState, useContext } from "react";
+import { createContext, useState, useContext,useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
@@ -11,19 +11,25 @@ export const UserProvider = ({ children }) => {
 
   const navigate = useNavigate();
 
-  const signup = async (name, email, password) => {
-    if (!name || !email || !password) {
+  const signup = async (name, email, password,coordinates) => {
+    const location = {
+      type: "Point",
+      coordinates
+    }
+    console.log(location);
+    
+    if (!name || !email || !password || !location) {
       return;
     }
   
     try {
-      const response = await axios.post(`${URI}/user/signup`, { name, email, password });
+      const response = await axios.post(`${URI}/user/signup`, { name, email, password,location });
       const data = response.data;
       
       if (data.success) {
         setToken(data.token);
         localStorage.setItem("token", data.token);
-        Navigate('/')
+        navigate('/')
       } else {
         console.error(data.message);
       }
@@ -45,7 +51,7 @@ export const UserProvider = ({ children }) => {
       if (data.success) {
         setToken(data.token);
         localStorage.setItem("token", data.token);
-        Navigate('/');
+        navigate('/');
       } else {
         console.error(data.message);
       }
@@ -91,6 +97,10 @@ export const UserProvider = ({ children }) => {
       console.error("Error in getting all task:", err);
     }
   }
+
+  useEffect(() => {
+    getAllTask();
+  },[]);
 
   const value = {
     token,

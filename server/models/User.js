@@ -21,12 +21,16 @@ const UserSchema = new mongoose.Schema(
     location: {
       type: {
         type: String,
-        enum: ['Point'], // This ensures that only a 'Point' type is used.
+        enum: ['Point'],
+        required: true, // Ensures the 'type' is provided
       },
       coordinates: {
-        type: [Number], // Array of [longitude, latitude]
+        type: [Number], // Array of numbers for longitude and latitude
+        required: true, // Ensures 'coordinates' are provided
       },
     },
+    
+    
     address: {
       type: String,
     },

@@ -1,5 +1,6 @@
 import React,{useState} from 'react';
 import { useUser } from '../context/UserContext';
+import useMapClick from '../hook/useMapClick'
 
 function Auth() {
   const [email,setEmail] = useState('')
@@ -7,12 +8,13 @@ function Auth() {
   const [name,setName] = useState('');
   const [state,setState] = useState('signup');
 
+  const { location, MapComponent } = useMapClick();
   const {signup,signin} = useUser();
 
   const createUser = () => {
     event.preventDefault()
     
-    if(state === 'signup') signup(name,email,password);
+    if(state === 'signup') signup(name,email,password,location);
     else    signin(email,password)
   }
 
@@ -75,6 +77,16 @@ function Auth() {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-500"
             />
           </div>
+
+          <p className="block text-gray-700 font-medium mb-2">Add Location:</p>
+          <div style={{ height: "400px", width: "100%", marginBottom: "20px" }}>
+            <MapComponent />
+          </div>
+          {location && (
+            <p>
+              Selected Location: {location[0]}, {location[1]}
+            </p>
+          )}
 
           <button
             type="submit"
