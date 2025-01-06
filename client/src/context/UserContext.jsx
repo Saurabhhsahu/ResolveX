@@ -7,6 +7,8 @@ const userContext = createContext();
 export const UserProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem("token") || ""); 
   const [tasks,setTasks] = useState(null);
+  const [myTasks,setMyTasks] = useState(null);
+
   const URI = import.meta.env.VITE_API_URI; 
 
   const navigate = useNavigate();
@@ -60,16 +62,20 @@ export const UserProvider = ({ children }) => {
     }
   };
 
-  const addTask = async(title,description,bounty,location) => {
+  const addTask = async(title,description,bounty,coordinates) => {
     try{
+      const location = {
+        type: "Point",
+        coordinates
+      }
       console.log(`title : ${title} description: ${description} bounty : ${bounty} location: ${location}`);
       const response = await axios.post(`${URI}/user/addTask`,{title,description,bounty,location},{headers:{token}});
       const data = response.data;
       console.log(data);
       
       if(data.success){
-        getAllTask()
-        navigate('/allTask');
+        getAllTask();
+        navigate('/my-tasks');
       }else{
         console.log(data.message);
       }
@@ -83,10 +89,8 @@ export const UserProvider = ({ children }) => {
     try{
       const response = await axios.get(`${URI}/user/allTask`,{headers:{token}});
       const data = response.data;
-
-      if(data.success){
-        console.log(data.allTask);
         
+      if(data.success){
         setTasks(data.allTask);
       }
       else{
@@ -98,8 +102,70 @@ export const UserProvider = ({ children }) => {
     }
   }
 
+  const getMyTasks = async() => {
+    try{
+      const response = await axios.get(`${URI}/user/myTask`,{headers:{token}});
+      const data = response.data;
+
+      if(data.success){
+        setMyTasks(data.myTasks);
+      }
+      else{
+        console.log(data.message);
+      }
+    }
+    catch (err) {
+      console.error("Error in getting all task:", err);
+    }
+  }
+
+  const updateTask = async({title,description,status,bounty,location,_id}) => {
+    console.log(title,description,bounty,location,status,_id);
+    
+    try{
+      const response = await axios.put(`${URI}/user/updateTask`,{title,description,bounty,location,status,_id},{headers:{token}});
+      const data = response.data;
+      
+      console.log(data.message);
+      if(data.success){
+        getMyTasks();
+      } 
+    }
+    catch (err) {
+      console.error("Error in updating task:", err);
+    }
+  }
+
+  const deleteTask = async(taskId) => {
+    try{
+      const response = await axios.delete(`${URI}/user/deleteTask/${taskId}`,{headers:{token}});
+      const data = response.data;
+
+      console.log(data.message);
+    }
+    catch(err){
+      console.log("Error in deleting the task : ",err);
+      
+    }
+  }
+
+  const sendRequest = async(taskId) => {
+    try{
+      const response = await axios.get(`${URI}/user/requestTask/${taskId}`,{headers:{token}});
+      const data = response.data;
+
+      console.log(data.message);
+    }
+    catch(err){
+      console.log("Error in sending request : ",err.message);
+    }
+  }
+
   useEffect(() => {
-    getAllTask();
+    if(token){
+      getAllTask();
+      getMyTasks();
+    }
   },[]);
 
   const value = {
@@ -108,7 +174,11 @@ export const UserProvider = ({ children }) => {
     signup,
     signin,
     addTask,getAllTask,
-    tasks,setTasks
+    tasks,setTasks,
+    myTasks,setMyTasks,
+    updateTask,
+    deleteTask,
+    sendRequest,
   };
 
   return <userContext.Provider value={value}>{children}</userContext.Provider>;

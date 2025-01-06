@@ -78,16 +78,22 @@ function Auth() {
             />
           </div>
 
-          <p className="block text-gray-700 font-medium mb-2">Add Location:</p>
-          <div style={{ height: "400px", width: "100%", marginBottom: "20px" }}>
-            <MapComponent />
-          </div>
-          {location && (
-            <p>
-              Selected Location: {location[0]}, {location[1]}
-            </p>
-          )}
-
+          {
+            state === 'signup' 
+            && 
+            <div className="mb-4">
+              <p className="block text-gray-700 font-medium mb-2">Add Location:</p>
+              <div style={{ height: "400px", width: "100%", marginBottom: "20px" }}>
+                <MapComponent />
+              </div>
+              {location && (
+                <p>
+                  Selected Location: {location[0]}, {location[1]}
+                </p>
+              )}
+            </div>
+          }
+          
           <button
             type="submit"
             onClick={createUser}

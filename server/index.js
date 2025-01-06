@@ -31,12 +31,19 @@ io.on("connection", (socket) => {
     socket.on("disconnect", () => {
         console.log("A user disconnected:", socket.id);
     });
+
+    socket.on('new_task', (task) => {
+        // Emit the notification to all connected users
+        io.emit('new_task_notification', {
+          message: `New task created: ${task.name}`,
+        });
+    });
 });
 
-server.listen(SOCKET_PORT, () => {
+server.listen(PORT, () => {
     console.log(`Socket running on port ${SOCKET_PORT}`);
 });
 
-app.listen(PORT, () =>{
-    console.log(`Server running on port ${PORT}`);
-})
+// app.listen(PORT, () =>{
+//     console.log(`Server running on port ${PORT}`);
+// })

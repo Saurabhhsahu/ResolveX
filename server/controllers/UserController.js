@@ -3,6 +3,10 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import validator from 'validator';
 import Task from '../models/Task.js'
+import Notification from '../models/Notification.js'
+import TaskModel from '../models/Task.js';
+
+import {ObjectId} from 'mongodb'
 
 const UserSignup = async (req, res) => {
     try {
@@ -167,14 +171,12 @@ const UpdateProfile = async (req, res) => {
 const AddTask = async(req,res) => {
     try{
         const {title,description,bounty,userId,location} = req.body;
-        console.log(`title : ${title} description: ${description} bounty : ${bounty} id : ${userId} location : ${location}`);
         
         if (!userId || !title || !description || !bounty || !location) {
             return res.status(400).json({ success: false, message: 'Missing Data' });
         }
 
         const existingUser = await User.findOne({ _id:userId });
-        console.log(existingUser);
         
         const newTask = new Task({
             title,
@@ -184,6 +186,26 @@ const AddTask = async(req,res) => {
             location
         });
         await newTask.save();
+
+
+        // ******* on hold ********** //
+    
+        // const users = await User.find({user:{$ne:userId}});
+
+        // const notifications = users.map((user) => {
+        //     return new Notification({
+        //       user: user._id,
+        //       message: `New task created: ${newTask.title}`,
+        //     });
+        //   });
+      
+        //   // Save notifications to the database
+        //   await Notification.insertMany(notifications);
+      
+        //   // Emit notification to all connected users using Socket.IO
+        //   req.app.get('io').emit('new_task_notification', {
+        //     message: `New task created: ${newTask.title}`,
+        //   });
 
         // req.app.get("io").emit("taskUploaded", { title, description, existingUser });
 
@@ -201,25 +223,147 @@ const AddTask = async(req,res) => {
     }
 }
 
-const AllTask = async(req,res) => {
+const AllTask = async (req, res) => {
+    try {
+        const { userId } = req.body;
+
+        // Fetch all tasks with status "Pending" except those with the provided userId
+        const allTask = await Task.find({ status: "Pending", user: { $ne: userId } });
+
+        return res.status(201).json({
+            success: true,
+            allTask,
+            message: 'All tasks returned successfully',
+        });
+    } catch (err) {
+        console.error('Error in getting all tasks: ', err);
+        res.status(500).json({
+            success: false,
+            message: 'Error in getting all tasks',
+        });
+    }
+};
+
+const MyTasks = async(req,res) => {
     try{
         const {userId} = req.body;
 
-        const allTask = await Task.find({status:"Pending"});
-        
-        res.status(201).json({
+        const myTasks = await Task.find({user:userId});
+
+        return res.status(201).json({
             success: true,
-            allTask,
-            message: 'All task returned successfully',
+            myTasks,
+            message: 'my tasks returned successfully',
         });
     }
     catch (err) {
-        console.error('Error in  getting all task: ', err);
+        console.error('Error in getting my tasks: ', err);
         res.status(500).json({
             success: false,
-            message: 'Error in getting all task',
+            message: 'Error in getting my tasks',
         });
     }
 }
 
-export { UserSignup, UserSignin, UpdateProfile,AddTask,AllTask };
+const UpdateTask = async(req,res) => {
+    try{
+        const {userId,_id,title,description,status,bounty,location} = req.body;
+        // console.log(userId,_id,title,description,status,bounty,location);
+    
+        const task = await Task.findOne({_id,user:userId});
+        if(!task){
+            return res.status(404).json({
+                success: false,
+                message: 'Task not found',
+            });
+        }
+
+        task.title = title;
+        task.description = description;
+        task.status = status;
+        task.bounty = bounty;
+        task.location = location;
+
+        await task.save();
+        
+        res.status(200).json({
+            success: true,
+            message: 'Task updated successfully',
+            updatedTask: task,
+        });
+    }
+    catch (err) {
+        console.error('Error in editing task: ', err);
+        res.status(500).json({
+            success: false,
+            message: 'Error in editing task',
+        });
+    }
+}
+
+const DeleteTask = async(req,res) => {
+    try{
+        const {taskId} = req.params;
+        console.log(taskId);
+        if(!taskId){
+            return res.status(400).json({
+                success: false,
+                message: 'task not found',
+            });
+        }
+
+        await Task.deleteOne({ _id:new ObjectId(taskId) });
+
+        return res.status(200).json({
+            success:true,
+            message:"Deleted task successfully"
+        })
+    }
+    catch (err) {
+        console.error('Error in deleting task: ', err);
+        res.status(500).json({
+            success: false,
+            message: 'Error in deleting task',
+        });
+    }
+}
+
+const GetRequest = async(req,res) => {
+    try{
+        const {userId} = req.body;
+        const {taskId} = req.params
+        
+        const task = await Task.findOne({_id: taskId});
+
+        if(!task){
+            return res.status(400).json({
+                success: false,
+                message: "Task not found"
+            })
+        }
+
+        if(task.assignedTo){
+            return res.status(400).json({
+                success: false,
+                message: "Task is already assigned"
+            })
+        }
+
+        task.requestedUsers.push(userId);
+        await task.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Request sent successfully"
+        })
+    }
+    catch(err){
+        console.log("Error in getting request for alloting : ",err.message);
+        return res.status(500).json({
+            success: false,
+            message: err.message
+        })
+    }
+}
+
+export { UserSignup, UserSignin, UpdateProfile,AddTask,AllTask,MyTasks,UpdateTask,DeleteTask,GetRequest };

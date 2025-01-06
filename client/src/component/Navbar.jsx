@@ -31,6 +31,7 @@ const Navbar = () => {
         <NavLink to="/" className="hover:text-gray-300">Home</NavLink>
         <NavLink to="/tasks" className="hover:text-gray-300">Tasks</NavLink>
         <NavLink to="/add-task" className="hover:text-gray-300">Add Task</NavLink>
+        <NavLink to="/my-tasks" className="hover:text-gray-300">My Tasks</NavLink>
         <NavLink to="/about-us" className="hover:text-gray-300">About us</NavLink>
       </div>
 

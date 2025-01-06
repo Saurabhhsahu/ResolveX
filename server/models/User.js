@@ -27,9 +27,8 @@ const UserSchema = new mongoose.Schema(
       coordinates: {
         type: [Number], // Array of numbers for longitude and latitude
         required: true, // Ensures 'coordinates' are provided
-      },
+      }
     },
-    
     
     address: {
       type: String,

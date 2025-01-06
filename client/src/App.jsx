@@ -7,6 +7,7 @@ import Profile from "./page/Profile";
 import AboutUs from "./page/AboutUs";
 import Tasks from "./page/Tasks";
 import AddTask from "./page/AddTask";
+import MyTasks from "./page/MyTasks";
 
 function App() {
   const { token } = useUser();
@@ -20,9 +21,11 @@ function App() {
         <Route path="about-us" element={<AboutUs />} />
         <Route path="tasks" element={<Tasks />} />
         <Route path="add-task" element={<AddTask />} />
+        <Route path="my-tasks" element={<MyTasks />} />
       </Route>
 
       <Route path='/profile' element={<Profile/>} />
+      
 
       <Route
         path="/auth"
