@@ -1,5 +1,5 @@
 import express from "express";
-import {UserSignup,UserSignin,UpdateProfile,AddTask,AllTask,MyTasks,UpdateTask,DeleteTask,GetRequest} from '../controllers/UserController.js'
+import {UserSignup,UserSignin,UpdateProfile,AddTask,AllTask,MyTasks,UpdateTask,DeleteTask,GetRequest,getProfile} from '../controllers/UserController.js'
 import upload from "../middlewares/multer.js";
 import authUser from "../middlewares/authUser.js";
 
@@ -14,5 +14,6 @@ router.get('/myTask',authUser,MyTasks);
 router.put('/updateTask',authUser,UpdateTask);
 router.delete('/deleteTask/:taskId',DeleteTask);
 router.get('/requestTask/:taskId',authUser,GetRequest);
+router.post('/getProfile',authUser,getProfile);
 
 export default  router;

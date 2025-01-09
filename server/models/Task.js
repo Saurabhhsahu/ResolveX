@@ -27,17 +27,18 @@ const TaskSchema = new mongoose.Schema(
       default: "Pending",
     },
     user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User", 
+      type: Object,
       required: true,
     },
+    userId:{
+      type: String,
+      required: true
+    },
     requestedUsers:[{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User"
+      type: Object
     }],
     assignedTo:{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      type: Object
     },
     location: {
       type: {

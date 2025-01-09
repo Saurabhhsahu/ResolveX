@@ -6,6 +6,8 @@ import Task from '../models/Task.js'
 import Notification from '../models/Notification.js'
 import TaskModel from '../models/Task.js';
 
+import cloudinary from 'cloudinary'
+
 import {ObjectId} from 'mongodb'
 
 const UserSignup = async (req, res) => {
@@ -138,32 +140,51 @@ const UpdateProfile = async (req, res) => {
     try {
         console.log("Handling profile update...");
 
-        const { id, name, email } = req.body;
+        const { userId, name, location, mobile, address } = req.body;
+        const imageFile = req.file;
 
-        if (!id) {
+        console.log(userId, name, location, mobile, address);
+
+        // Ensure `location` and `address` are objects, not strings
+        const parsedLocation = typeof location === 'string' ? JSON.parse(location) : location;
+        const parsedAddress = typeof address === 'string' ? JSON.parse(address) : address;
+
+        // Check if the required fields are present
+        if (!name || !mobile || !parsedLocation || !parsedAddress) {
+            console.log("Missing data");
+            return res.status(400).json({ success: false, message: 'Missing data' });
+        }
+
+        if (!userId) {
+            console.log("ID required");
             return res.status(400).json({ success: false, message: 'User ID is required' });
         }
 
-        const updatedUser = await User.findByIdAndUpdate(
-            id,
-            { name, email },
-            { new: true }
-        );
+        // Update user profile data with properly parsed objects
+        await User.findByIdAndUpdate(userId, { 
+            name, 
+            mobile, 
+            location: parsedLocation, 
+            address: parsedAddress 
+        });
 
-        if (!updatedUser) {
-            return res.status(404).json({ success: false, message: 'User not found' });
+        // Handle image file if provided
+        if (imageFile) {
+            const imageUpload = await cloudinary.uploader.upload(imageFile.path, { resource_type: 'image' });
+            const imageURL = imageUpload.secure_url;
+
+            await User.findByIdAndUpdate(userId, { image: imageURL });
         }
 
         res.status(200).json({
             success: true,
-            user: updatedUser,
             message: 'Profile updated successfully',
         });
     } catch (err) {
-        console.error('Error in updating profile: ', err);
+        console.error('Error in updating profile: ', err.message);
         res.status(500).json({
             success: false,
-            message: 'Error in updating profile',
+            message: err.message,
         });
     }
 };
@@ -183,6 +204,7 @@ const AddTask = async(req,res) => {
             description,
             bounty,
             user:existingUser,
+            userId,
             location
         });
         await newTask.save();
@@ -226,10 +248,10 @@ const AddTask = async(req,res) => {
 const AllTask = async (req, res) => {
     try {
         const { userId } = req.body;
-
+        
         // Fetch all tasks with status "Pending" except those with the provided userId
-        const allTask = await Task.find({ status: "Pending", user: { $ne: userId } });
-
+        const allTask = await Task.find({ status: "Pending", userId: { $ne: userId } });
+        
         return res.status(201).json({
             success: true,
             allTask,
@@ -248,8 +270,8 @@ const MyTasks = async(req,res) => {
     try{
         const {userId} = req.body;
 
-        const myTasks = await Task.find({user:userId});
-
+        const myTasks = await Task.find({userId });
+        
         return res.status(201).json({
             success: true,
             myTasks,
@@ -329,6 +351,7 @@ const DeleteTask = async(req,res) => {
 }
 
 const GetRequest = async(req,res) => {
+    
     try{
         const {userId} = req.body;
         const {taskId} = req.params
@@ -349,7 +372,9 @@ const GetRequest = async(req,res) => {
             })
         }
 
-        task.requestedUsers.push(userId);
+        const user = await User.findOne({_id:userId});
+
+        task.requestedUsers.push(user);
         await task.save();
 
         return res.status(200).json({
@@ -358,7 +383,7 @@ const GetRequest = async(req,res) => {
         })
     }
     catch(err){
-        console.log("Error in getting request for alloting : ",err.message);
+        console.log("Error in requesting task : ",err.message);
         return res.status(500).json({
             success: false,
             message: err.message
@@ -366,4 +391,34 @@ const GetRequest = async(req,res) => {
     }
 }
 
-export { UserSignup, UserSignin, UpdateProfile,AddTask,AllTask,MyTasks,UpdateTask,DeleteTask,GetRequest };
+const getProfile = async(req,res) => {
+    try{
+        console.log("handling getprofile");
+        
+        const {userId,profileId} = req.body
+        
+        const data = profileId ? profileId : userId;
+        const user = await User.findOne({_id:data})
+        
+        if(!user){
+            return res.status(400).json({
+                success: false,
+                message: "User not found"
+            })
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "User profile fetched successfully",
+            user
+        })
+    }
+    catch(err){
+        return res.status(500).json({
+            success: false,
+            message: err.message
+        })
+    }
+}
+
+export { UserSignup, UserSignin, UpdateProfile,AddTask,AllTask,MyTasks,UpdateTask,DeleteTask,GetRequest,getProfile };

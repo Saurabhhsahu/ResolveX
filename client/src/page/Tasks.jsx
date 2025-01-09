@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css'; // Import Leaflet CSS
-import { useUser } from '../context/UserContext';
+import { useTask} from '../context/TaskContext';
 import L from 'leaflet';
 
 // Import marker icons
@@ -11,7 +11,7 @@ import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import { useSVGOverlay } from 'react-leaflet/SVGOverlay';
 
 function Tasks() {
-  const { tasks, getAllTask,sendRequest } = useUser();
+  const { tasks, getAllTask,sendRequest } = useTask();
   const [allot,setAllot] = useState(false);
   
   useEffect(() => {
@@ -30,7 +30,8 @@ function Tasks() {
   });
 
   const handleRequest = (taskId) => {
-    sendRequest(taskId);
+    console.log(taskId._id);
+    sendRequest(taskId._id)
   }
 
   return (

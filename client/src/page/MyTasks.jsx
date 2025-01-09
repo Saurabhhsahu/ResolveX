@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useUser } from '../context/UserContext';
+import {useTask} from '../context/TaskContext'
 import L from 'leaflet';
+import { useNavigate } from 'react-router-dom';
 
 // Import marker icons
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
@@ -10,9 +12,12 @@ import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
 function MyTasks() {
-  const { myTasks, updateTask, deleteTask,getMyTasks,setMyTasks } = useUser(); // Add deleteTask function from context
+  const { myTasks, updateTask, deleteTask,getMyTasks,setMyTasks } = useTask(); 
+
   const [editingTaskId, setEditingTaskId] = useState(null);
   const [editedTask, setEditedTask] = useState(null);
+
+  const navigate = useNavigate();
 
   // Define a custom icon for the marker
   const customIcon = new L.Icon({
@@ -49,6 +54,13 @@ function MyTasks() {
     setMyTasks(updatedTasks)
     getMyTasks();
   };
+
+  const handleTask = (task) => {
+    const taskId = task._id;
+    console.log("Hello bro");
+    
+    navigate(`/task/${taskId}`)
+  }
 
   const EditableMarker = ({ location, title }) => (
     <Marker position={location} icon={customIcon}>
@@ -105,7 +117,7 @@ function MyTasks() {
                   </button>
                 </div>
               ) : (
-                <div>
+                <div onClick = {() => handleTask(task)} className="cursor-pointer">
                   <h2 className="text-lg font-semibold mb-2">{task.title}</h2>
                   <p className="text-gray-400 mb-1">
                     <span className="font-medium text-gray-200">Description:</span> {task.description}

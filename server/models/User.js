@@ -15,7 +15,7 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    profilePic: {
+    image: {
       type: String,
     },
     location: {
@@ -30,9 +30,13 @@ const UserSchema = new mongoose.Schema(
       }
     },
     
-    address: {
-      type: String,
-    },
+    address:{
+      type:Object,
+      default: {
+          line1:'',
+          line2:''
+      }
+  },
     mobile: {
       type: String,
     },

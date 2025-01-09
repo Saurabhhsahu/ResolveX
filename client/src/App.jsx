@@ -8,6 +8,8 @@ import AboutUs from "./page/AboutUs";
 import Tasks from "./page/Tasks";
 import AddTask from "./page/AddTask";
 import MyTasks from "./page/MyTasks";
+import TaskDetails from "./page/TaskDetails";
+import ProfileTemplate from "./component/ProfileTemplate";
 
 function App() {
   const { token } = useUser();
@@ -25,7 +27,8 @@ function App() {
       </Route>
 
       <Route path='/profile' element={<Profile/>} />
-      
+      <Route path='/task/:taskId' element={<TaskDetails/>} />
+      <Route path='/task/profile/:userId' element={<ProfileTemplate/>} />
 
       <Route
         path="/auth"

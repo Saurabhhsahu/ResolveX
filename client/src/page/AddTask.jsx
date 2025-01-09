@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import {useUser} from '../context/UserContext'
+import {useTask} from '../context/TaskContext'
 import useMapClick from '../hook/useMapClick'
 
 function AddTask() {
@@ -10,7 +10,7 @@ function AddTask() {
 
   const { location, MapComponent } = useMapClick();
 
-  const {addTask} = useUser();
+  const {addTask} = useTask();
 
   const handleSubmit = (e) => {
     e.preventDefault()
